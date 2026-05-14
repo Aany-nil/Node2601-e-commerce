@@ -18,6 +18,4 @@ app.listen(8000, () => {
 
 // DB_URL=mongodb+srv://node2601-e-commerce:sFOuZlafQ7tvaPJc@cluster0.r33yxrd.mongodb.net/node2601-e-commerce?appName=Cluster0
 
-// sFOuZlafQ7tvaPJc
-
 // node2601-e-commerce
