@@ -1,6 +1,6 @@
 const { otpTemplate } = require("../helpers/emailTemplates");
 const { mailsender } = require("../helpers/mailService");
-const { isValidEmail, generateOTP } = require("../helpers/Utils");
+const { isValidEmail, generateOTP, generateAccessToken, generateRefreshToken } = require("../helpers/Utils");
 const userSchema = require("../models/userSchema");
 
 const signUp = async (req, res) => {
@@ -90,6 +90,13 @@ const resendOtp = async (req, res) => {
     }
 };
 
+const cookie_config = {
+      httpOnly: false, // Not accessible by client-side JS
+      secure: false, // Only sent over HTTPS
+      // sameSite: 'Strict' // Only send for same-site requests
+
+}
+
 const signIn = async (req, res) => {
     const {email, password} = req.body;
     try {
@@ -102,8 +109,13 @@ const signIn = async (req, res) => {
        const matchPassword = await userData.comparePassword(password);
        if(!matchPassword) 
         return res.status(400).send({ message: "Password false" });
+       const accessToken = generateAccessToken(userData);
+       const refreshToken = generateRefreshToken(userData);
 
-       res.status(200).send({ message: "Login successfully" });
+       res.status(200)
+       .cookie("acc_tkn", accessToken, cookie_config)
+       .cookie("ref_tkn", refreshToken, cookie_config)
+       .send({ message: "Login successfully" });
     } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Internal server Error" });   
