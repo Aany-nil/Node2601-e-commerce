@@ -18,4 +18,18 @@ const authMiddleware = (req, res, next) => {
  }
 }
 
-module.exports = { authMiddleware }
+const roleCheck = (roles) => {
+ return (req, res, next) => {
+  if(Array.isArray(roles) && roles.length > 0) {
+   if(roles.includes(req.user.role)) {
+      next()
+   } else {
+   res.status(403).send({ message: "Forbidden" }); 
+   }
+  } else {
+   res.status(403).send({ message: "Forbidden" });
+  }
+ };
+};
+
+module.exports = { authMiddleware, roleCheck }
