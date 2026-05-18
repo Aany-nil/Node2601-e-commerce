@@ -1,6 +1,10 @@
 const { otpTemplate } = require("../helpers/emailTemplates");
 const { mailsender } = require("../helpers/mailService");
-const { isValidEmail, generateOTP, generateAccessToken, generateRefreshToken } = require("../helpers/Utils");
+const { 
+    isValidEmail, 
+    generateOTP, 
+    generateAccessToken, 
+    generateRefreshToken } = require("../helpers/Utils");
 const userSchema = require("../models/userSchema");
 
 const signUp = async (req, res) => {
@@ -38,7 +42,7 @@ const signUp = async (req, res) => {
         console.log(error);
         res.status(500).send({ message: "Internal server Error" });
     }
-}
+};
 
 const verifyOtp = async (req, res) => {
     const {email, otp} = req.body;
@@ -95,7 +99,7 @@ const cookie_config = {
       secure: false, // Only sent over HTTPS
       // sameSite: 'Strict' // Only send for same-site requests
 
-}
+};
 
 const signIn = async (req, res) => {
     const {email, password} = req.body;
@@ -120,7 +124,39 @@ const signIn = async (req, res) => {
     console.log(error);
     res.status(500).send({ message: "Internal server Error" });   
     }
-}
+};
+
+const getProfile = async (req, res) => {
+    try {
+       const profileData = await userSchema.findOne(
+        { _id: req.user._id }, 
+        { fullName: 1, email: 1, role: 1, avatar: 1, address: 1 },
+    );
+       if(!profileData) return res.status(400).send({message: "Invalid request"});
+
+       res.status(200).send(profileData);
+    } catch (error) {
+      console.log(error);
+     res.status(500).send({ message: "Internal server Error" });   
+    }
+};
+
+const updateProfile = async (req, res) => {
+  const { fullName, address } = req.body;
+  const avatar = req.file;
+ try {
+    const userData = await userSchema.findOne({ _id: req.user._id });
+
+    if(!userData) 
+       return res.status(400).send({ message: "Something went wrong" });
+    if(fullName && fullName.trim()) userData.fullName = fullName;
+    if(address && address.trim()) userData.address = address;
+   
+ } catch (error) {
+   console.log(error);
+  res.status(500).send({ message: "Internal server Error" });  
+ }
+};
 
 
-module.exports = { signUp, verifyOtp, resendOtp, signIn };
+module.exports = { signUp, verifyOtp, resendOtp, signIn, getProfile, updateProfile };
